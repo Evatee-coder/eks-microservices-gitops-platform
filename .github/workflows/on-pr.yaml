@@ -1,0 +1,52 @@
+# manual deploy -> multi-env deployment workflow for EKS
+name: PR infra check
+
+on:
+  # pull_request:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'EKS-proper-infra/**'
+  workflow_dispatch:
+
+env:
+  TF_VERSION: 1.13.1
+  AWS_REGION: us-east-1
+  
+
+jobs:
+  dev-check:                      # ✅ properly indented
+    name: EKS Infra Dev Check
+    runs-on: ubuntu-latest
+
+    permissions:                  # ✅ properly indented under job
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::216989097838:role/eks-github-actions-build-role
+          role-session-name: GitHub_to_AWS_via_OIDC_PR
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform fmt check
+        working-directory: ${{ env.infra_path }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: ${{ env.infra_path }}
+        run: terraform init -backend-config=vars/dev.tfbackend
+
+      - name: Terraform Plan
+        working-directory: ${{ env.infra_path }}
+        run: terraform plan -var-file=vars/dev.tfvars
