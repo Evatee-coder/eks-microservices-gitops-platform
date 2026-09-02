@@ -54,25 +54,6 @@ module "vpc" {
 
 
   # --- EKS-only private subnet tags (RDS subnets intentionally excluded) ---
-
-#   locals {
-#     eks_subnet_ids = slice(module.vpc.private_subnets, 0, length(var.subnet_cidrs["eks_private_subnets"]))
-#   }
-
-#   resource "aws_ec2_tag" "eks_subnet_cluster_tag" {
-#   for_each    = toset(local.eks_subnet_ids)
-#   resource_id = each.value
-#   key         = "kubernetes.io/cluster/eks-three-tier-end-to-end"
-#   value       = "shared"
-# }
-
-# resource "aws_ec2_tag" "eks_subnet_role_tag" {
-#   for_each    = toset(local.eks_subnet_ids)
-#   resource_id = each.value
-#   key         = "kubernetes.io/role/internal-elb"
-#   value       = "1"
-# }
-
 locals {
   eks_subnet_cidrs = var.subnet_cidrs["eks_private_subnets"]
 }
