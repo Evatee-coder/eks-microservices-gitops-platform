@@ -227,3 +227,13 @@ crash.log
 .terraform/
 .terraform/*    
 .terraform.lock.hcl
+
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
