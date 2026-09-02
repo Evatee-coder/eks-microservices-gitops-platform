@@ -71,6 +71,45 @@ resource "aws_iam_role_policy_attachment" "github_actions_ecr" {
 }
 
 
+
+
+
+# Terraform state access policy
+resource "aws_iam_policy" "terraform_state_access" {
+  name = "eks-terraform-state-access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::state-bucket-216989097838"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = "eks/*"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Resource = "arn:aws:s3:::state-bucket-216989097838/eks/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_state" {
+  role       = aws_iam_role.github_actions_build.name
+  policy_arn = aws_iam_policy.terraform_state_access.arn
+}
+
+
+
 import {
   to = aws_iam_role.github_actions_build
   id = "eks-github-actions-build-role"
