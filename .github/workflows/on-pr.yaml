@@ -30,8 +30,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          #role-to-assume: arn:aws:iam::216989097838:role/eks-github-actions-build-role
-          role-to-assume: arn:aws:iam::216989097838:role/eks-microservices-gitops-build-role
+          role-to-assume: arn:aws:iam::216989097838:role/eks-github-actions-build-role
           role-session-name: GitHub_to_AWS_via_OIDC_PR
           aws-region: ${{ env.AWS_REGION }}
 
