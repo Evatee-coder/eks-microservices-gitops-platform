@@ -2,12 +2,12 @@
 name: PR infra check
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - 'EKS-proper-infra/**'
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'eks-proper-infra/**'
+  #workflow_dispatch:
 
 env:
   TF_VERSION: 1.13.1
