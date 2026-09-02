@@ -33,14 +33,24 @@ variable "aws_region" {
 
 }
 
+# variable "subnet_cidrs" {
+#   description = "List of CIDR blocks for the subnets"
+#   type        = map(list(string))
+#   default = {
+#     private_subnets = ["10.0.3.0/24", "10.0.4.0/24"]
+#     public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
+#   }
+
+# }
+
 variable "subnet_cidrs" {
   description = "List of CIDR blocks for the subnets"
   type        = map(list(string))
   default = {
-    private_subnets = ["10.0.3.0/24", "10.0.4.0/24"]
-    public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
+    public_subnets      = ["10.0.1.0/24", "10.0.2.0/24"]
+    eks_private_subnets = ["10.0.3.0/24", "10.0.4.0/24"]
+    rds_private_subnets = ["10.0.5.0/24", "10.0.6.0/24"]
   }
-
 }
 
 
