@@ -48,12 +48,12 @@ jobs:
         working-directory: ${{ env.infra_path }}
         run: terraform init -backend-config=vars/dev.tfbackend
 
-      - name: Debug - list files
-        working-directory: ${{ env.infra_path }}
-        run: |
-          pwd
-          ls -la
-          ls -la vars/
+    #   - name: Debug - list files
+    #     working-directory: ${{ env.infra_path }}
+    #     run: |
+    #       pwd
+    #       ls -la
+    #       ls -la vars/
 
       - name: Terraform Plan
         working-directory: ${{ env.infra_path }}
