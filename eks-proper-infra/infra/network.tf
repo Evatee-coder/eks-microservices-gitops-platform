@@ -31,8 +31,8 @@ module "vpc" {
     Environment = var.environment
     repo        = "eks-microservices-gitops-platforms"
   }
-  
-  
+
+
 
   # Required tags for EKS cluster subnet discovery
 
@@ -41,7 +41,7 @@ module "vpc" {
   # explicitly below, scoped only to the EKS subnets (not RDS).
   public_subnet_tags = {
     "kubernetes.io/cluster/eks-microservices-gitops-platform" = "shared"
-    "kubernetes.io/role/elb"                          = "1"
+    "kubernetes.io/role/elb"                                  = "1"
   }
 
   # # Required tags for EKS cluster subnet discovery
@@ -53,7 +53,7 @@ module "vpc" {
 }
 
 
-  # --- EKS-only private subnet tags (RDS subnets intentionally excluded) ---
+# --- EKS-only private subnet tags (RDS subnets intentionally excluded) ---
 locals {
   eks_subnet_cidrs = var.subnet_cidrs["eks_private_subnets"]
 }
