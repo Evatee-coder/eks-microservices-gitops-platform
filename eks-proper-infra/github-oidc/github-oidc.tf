@@ -188,6 +188,8 @@ resource "aws_iam_policy" "eks_provisioning" {
           "iam:GetPolicy",
           "iam:GetPolicyVersion",
           "iam:ListPolicyVersions",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
           "iam:CreateOpenIDConnectProvider",
           "iam:DeleteOpenIDConnectProvider",
           "iam:GetOpenIDConnectProvider",
