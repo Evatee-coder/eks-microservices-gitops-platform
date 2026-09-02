@@ -55,7 +55,7 @@ resource "aws_iam_role" "github_actions_build" {
           StringLike = {
             "token.actions.githubusercontent.com:sub" = "repo:Evatee-coder@70039845/eks-microservices-gitops-platform@1354028614:*"
           }
-        } 
+        }
       }
     ]
   })
