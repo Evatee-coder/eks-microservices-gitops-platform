@@ -250,6 +250,36 @@ resource "aws_iam_role_policy_attachment" "github_actions_eks_provisioning" {
 
 
 
+resource "aws_iam_policy" "rds_provisioning" {
+  name = "eks-github-actions-rds-provisioning"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "RDSSubnetGroupManagement"
+        Effect = "Allow"
+        Action = [
+          "rds:CreateDBSubnetGroup",
+          "rds:DeleteDBSubnetGroup",
+          "rds:DescribeDBSubnetGroups",
+          "rds:ModifyDBSubnetGroup",
+          "rds:AddTagsToResource",
+          "rds:ListTagsForResource"
+        ]
+        Resource = "arn:aws:rds:us-east-1:216989097838:subgrp:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_rds" {
+  role       = aws_iam_role.github_actions_build.name
+  policy_arn = aws_iam_policy.rds_provisioning.arn
+}
+
+
+
 
 import {
   to = aws_iam_role.github_actions_build
