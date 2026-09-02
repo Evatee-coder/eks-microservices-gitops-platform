@@ -77,9 +77,9 @@ resource "aws_ec2_tag" "eks_subnet_role_tag" {
 # no load balancer placement — database tier stays out of the cluster's
 # networking surface area.
 
-resource "aws_db_subnet_group" "rds" {
-  name       = "rds-subnet-group"
-  subnet_ids = [module.vpc.private_subnets[2], module.vpc.private_subnets[3]]
-  tags       = { Name = "rds-subnet-group" }
-}
+# resource "aws_db_subnet_group" "rds" {
+#   name       = "rds-subnet-group"
+#   subnet_ids = [module.vpc.private_subnets[2], module.vpc.private_subnets[3]]
+#   tags       = { Name = "rds-subnet-group" }
+# }
 
