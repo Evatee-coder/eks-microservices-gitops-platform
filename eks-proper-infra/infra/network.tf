@@ -6,7 +6,7 @@ module "vpc" {
   cidr = var.vpc_cidr
 
   # for two azs
-  azs = ["${var.aws_region}a", "${var.aws_region}b"]
+  azs             = ["${var.aws_region}a", "${var.aws_region}b"]
   private_subnets = var.subnet_cidrs["private_subnets"]
   public_subnets  = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
 

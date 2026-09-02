@@ -1,5 +1,5 @@
 module "eks" {
-  count   = var.if_eks_needed ? 1 : 0 # if the value is true, do the first(1) one, if the value is false, do the second(0) one. 
+  count = var.if_eks_needed ? 1 : 0 # if the value is true, do the first(1) one, if the value is false, do the second(0) one. 
   #So if the value is false, it will not create any EKS cluster, and if the value is true, it will create 1 EKS cluster. 
   #This way we can control whether we want to create EKS cluster or not based on the environment (dev or prod) by setting the value 
   #of if_eks_needed variable in the respective tfvars file.
