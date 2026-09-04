@@ -7,7 +7,7 @@ module "eks" {
   version = "~> 21.5.0"
 
   #name               = "eks-three-tier-end-to-end" #
-  name               = "${var.environment}-${var.prefix}-ekscluster"
+  name               = "${var.environment}-${var.prefix}-${var.eks_cluster_name}" #ekscluster
   kubernetes_version = "1.33"
 
   addons = {
@@ -22,7 +22,8 @@ module "eks" {
   endpoint_public_access = true
 
   # Optional: Adds the current caller identity as an administrator via cluster access entry
-  enable_cluster_creator_admin_permissions = true
+  #enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = false  # added this to remove AWS-side conflict permanently and keeps my access grant explicit and visible in my own code
 
   vpc_id = module.vpc.vpc_id
 
