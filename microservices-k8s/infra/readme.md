@@ -23,4 +23,6 @@ terraform apply -var-file=vars/prod.tfvars
 
 # conect to eks cluster from local
 
-aws eks update-kubeconfig --name prod-dec-ekscluster 
+aws eks update-kubeconfig --name prod-microservices-ekscluster
+
+kubectl config rename-context <arn..clusterName> <newName>

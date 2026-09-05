@@ -17,13 +17,13 @@
 #   }
 # }
 
-# # Deploy kube-prometheus-stack (includes Prometheus, Grafana, Alertmanager, and exporters)
-# resource "helm_release" "kube_prometheus_stack" {
+# # # Deploy kube-prometheus-stack (includes Prometheus, Grafana, Alertmanager, and exporters)
+# resource "helm_release" "kube_prometheus_grafana_stack" {
 #   name       = "kube-prometheus-stack"
 #   repository = "https://prometheus-community.github.io/helm-charts"
 #   chart      = "kube-prometheus-stack"
 #   namespace  = kubernetes_namespace.monitoring.metadata[0].name
-#   version    = "65.0.0"
+#   version    = "70.0.0"
 
 #   # Timeout increased for initial setup
 #   timeout = 600
@@ -54,8 +54,8 @@
 #           storageSpec = {
 #             volumeClaimTemplate = {
 #               spec = {
-#                 storageClassName = "gp2" #
-#                 accessModes = ["ReadWriteOnce"]
+#                 storageClassName = "gp2"
+#                 accessModes      = ["ReadWriteOnce"]
 #                 resources = {
 #                   requests = {
 #                     storage = "20Gi"
@@ -76,8 +76,8 @@
 #           # Additional scrape configs for custom metrics
 #           additionalScrapeConfigs = []
 
-#           # Configure Prometheus to work with subpath
-#           externalUrl = "https://frontend.${var.environment}.${var.app_name}.${var.domain}/prometheus"
+#           # Configure Prometheus to work with subdomain
+#           externalUrl = "https://prometheus.${var.environment}.${var.app_name}.${var.domain}"
 #           routePrefix = "/"
 #         }
 
@@ -91,110 +91,95 @@
 #       # =======================
 #       # Grafana Configuration
 #       # =======================
-#       # grafana = {
-#       #   enabled = true
+#       grafana = {
+#         enabled = true
 
-#       #   # Admin credentials
-#       #   adminPassword = "admin123" # Change this in production!
+#         # Admin credentials
+#         adminPassword = "admin123" # Change this in production!
 
-#       #   # Resource requests and limits
-#       #   resources = {
-#       #     requests = {
-#       #       cpu    = "250m"
-#       #       memory = "512Mi"
-#       #     }
-#       #     limits = {
-#       #       cpu    = "500m"
-#       #       memory = "1Gi"
-#       #     }
-#       #   }
+#         # Resource requests and limits
+#         resources = {
+#           requests = {
+#             cpu    = "250m"
+#             memory = "512Mi"
+#           }
+#           limits = {
+#             cpu    = "500m"
+#             memory = "1Gi"
+#           }
+#         }
 
-#       #   # Persistence for Grafana dashboards and data
-#       #   persistence = {
-#       #     enabled = true
-#       #     size    = "10Gi"
-#       #   }
-#       #   storageSpec = {
-#       #       volumeClaimTemplate = {
-#       #         spec = {
-#       #           storageClassName = "gp2" #
-#       #           accessModes = ["ReadWriteOnce"]
-#       #           resources = {
-#       #             requests = {
-#       #               storage = "10Gi"
-#       #             }
-#       #           }
-#       #         }
-#       #       }
-#       #     }
+#         # Persistence for Grafana dashboards and data
+#         persistence = {
+#           enabled          = true
+#           storageClassName = "gp2"
+#           accessModes      = ["ReadWriteOnce"]
+#           size             = "10Gi"
+#         }
 
-#       #   # Grafana service configuration
-#       #   service = {
-#       #     type = "ClusterIP"
-#       #     port = 80
-#       #   }
+#         # Grafana service configuration
+#         service = {
+#           type = "ClusterIP"
+#           port = 80
+#         }
 
-#       #   # Disable default datasource creation (we'll use the sidecar)
-#       #   sidecar = {
-#       #     datasources = {
-#       #       enabled                  = true
-#       #       defaultDatasourceEnabled = true
-#       #     }
-#       #   }
+#         # Disable default datasource creation (we'll use the sidecar)
+#         sidecar = {
+#           datasources = {
+#             enabled                  = true
+#             defaultDatasourceEnabled = true
+#           }
+#         }
 
-#       #   # Pre-configured dashboards
-#       #   # dashboardProviders = {
-#       #   #   "dashboardproviders.yaml" = {
-#       #   #     apiVersion = 1
-#       #   #     providers = [
-#       #   #       {
-#       #   #         name            = "default"
-#       #   #         orgId           = 1
-#       #   #         folder          = ""
-#       #   #         type            = "file"
-#       #   #         disableDeletion = false
-#       #   #         editable        = true
-#       #   #         options = {
-#       #   #           path = "/var/lib/grafana/dashboards/default"
-#       #   #         }
-#       #   #       }
-#       #   #     ]
-#       #   #   }
-#       #   # }
+#         # Pre-configured dashboards
+#         # dashboardProviders = {
+#         #   "dashboardproviders.yaml" = {
+#         #     apiVersion = 1
+#         #     providers = [
+#         #       {
+#         #         name            = "default"
+#         #         orgId           = 1
+#         #         folder          = ""
+#         #         type            = "file"
+#         #         disableDeletion = false
+#         #         editable        = true
+#         #         options = {
+#         #           path = "/var/lib/grafana/dashboards/default"
+#         #         }
+#         #       }
+#         #     ]
+#         #   }
+#         # }
 
-#       #   # Import common dashboards
-#       #   dashboards = {
-#       #     default = {
-#       #       kubernetes-cluster = {
-#       #         gnetId     = 7249
-#       #         revision   = 1
-#       #         datasource = "Prometheus"
-#       #       }
-#       #       kubernetes-pods = {
-#       #         gnetId     = 6417
-#       #         revision   = 1
-#       #         datasource = "Prometheus"
-#       #       }
-#       #       nginx-ingress = {
-#       #         gnetId     = 9614
-#       #         revision   = 1
-#       #         datasource = "Prometheus"
-#       #       }
-#       #     }
-#       #   }
+#         # Import common dashboards
+#         dashboards = {
+#           default = {
+#             kubernetes-cluster = {
+#               gnetId     = 7249
+#               revision   = 1
+#               datasource = "Prometheus"
+#             }
+#             kubernetes-pods = {
+#               gnetId     = 6417
+#               revision   = 1
+#               datasource = "Prometheus"
+#             }
 
-#       #   # Grafana ini configuration
-#       #   "grafana.ini" = {
-#       #     server = {
-#       #       domain              = "grafana.${var.environment}.${var.app_name}.${var.domain}"
-#       #       root_url            = "https://grafana.${var.environment}.${var.app_name}.${var.domain}"
-#       #       serve_from_sub_path = true
-#       #     }
-#       #     analytics = {
-#       #       check_for_updates = false
-#       #     }
-#       #   }
-#       # }
+#           }
+#         }
+
+#         # Grafana ini configuration
+#         "grafana.ini" = {
+#           server = {
+#             domain              = "${var.environment}.${var.app_name}.${var.domain}"
+#             root_url            = "https://grafana.${var.environment}.${var.app_name}.${var.domain}/grafana"
+#             serve_from_sub_path = true
+#           }
+#           analytics = {
+#             check_for_updates = false
+#           }
+#         }
+#       }
 
 #       # =======================
 #       # Alertmanager Configuration
@@ -217,6 +202,7 @@
 #       #       storage = {
 #       #         volumeClaimTemplate = {
 #       #           spec = {
+#       #             storageClassName = "gp2"
 #       #             accessModes = ["ReadWriteOnce"]
 #       #             resources = {
 #       #               requests = {
@@ -280,7 +266,7 @@
 #   ]
 
 #   depends_on = [
-#     kubernetes_namespace.monitoring
+#     kubernetes_namespace.monitoring,
 #   ]
 # }
 
@@ -320,7 +306,7 @@
 #   })
 
 #   depends_on = [
-#     helm_release.kube_prometheus_stack,
+#     helm_release.kube_prometheus_grafana_stack,
 #   ]
 # }
 
@@ -348,14 +334,14 @@
 #         {
 #           port     = "http"
 #           path     = "/metrics"
-#           interval = "30s"
+#           interval = "30s" # fetch metrics every 30 seconds
 #         }
 #       ]
 #     }
 #   })
 
 #   depends_on = [
-#     helm_release.kube_prometheus_stack,
+#     helm_release.kube_prometheus_grafana_stack,
 #   ]
 # }
 
@@ -390,7 +376,7 @@
 #   })
 
 #   depends_on = [
-#     helm_release.kube_prometheus_stack,
+#     helm_release.kube_prometheus_grafana_stack,
 #   ]
 # }
 
@@ -425,13 +411,13 @@
 #   })
 
 #   depends_on = [
-#     helm_release.kube_prometheus_stack,
+#     helm_release.kube_prometheus_grafana_stack,
 #   ]
 # }
 
-# # ============================================================================
-# # Ingress for Grafana UI
-# # ============================================================================
+# # # ============================================================================
+# # # Ingress for Grafana UI
+# # # ============================================================================
 # resource "kubectl_manifest" "grafana_ingress" {
 #   yaml_body = yamlencode({
 #     apiVersion = "networking.k8s.io/v1"
@@ -440,20 +426,46 @@
 #       name      = "grafana-ingress"
 #       namespace = kubernetes_namespace.monitoring.metadata[0].name
 #       annotations = {
-#         "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
-#         "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
-#         "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+#         # Create an internet-facing ALB (public access)
+#         "alb.ingress.kubernetes.io/scheme" = "internet-facing"
+
+#         # Use IP mode for better compatibility with Fargate and pod networking
+#         "alb.ingress.kubernetes.io/target-type" = "ip"
+
+#         # Health check path - ALB will check this endpoint for service health
+#         "alb.ingress.kubernetes.io/healthcheck-path" = "/"
+
+#         # SSL/TLS Configuration
+#         # Listen on both HTTP (80) and HTTPS (443) ports
+#         "alb.ingress.kubernetes.io/listen-ports" = "[{\"HTTP\": 80}, {\"HTTPS\": 443}]"
+
+#         # Automatically redirect HTTP traffic to HTTPS
+#         "alb.ingress.kubernetes.io/ssl-redirect" = "443"
+
+#         # SSL Security Policy - ensures strong encryption
+#         "alb.ingress.kubernetes.io/ssl-policy" = "ELBSecurityPolicy-TLS-1-2-2017-01"
+
+#         # AWS ACM Certificate ARN - replace with your certificate ARN
+#         # NOTE: Ensure this certificate covers your domain and is in the correct AWS region
+#         "alb.ingress.kubernetes.io/certificate-arn" = aws_acm_certificate.cert.arn
+
+#         # HTTP to HTTPS redirect action configuration
+#         "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": {\"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
+
+#         # Group name - all ingresses with the same group share a single ALB
+#         "alb.ingress.kubernetes.io/group.name" = "shared-alb"
 #       }
+
 #       labels = {
 #         app        = "grafana"
 #         managed-by = "terraform"
 #       }
 #     }
 #     spec = {
-#       ingressClassName = "nginx"
+#       ingressClassName = "alb"
 #       tls = [
 #         {
-#           hosts      = ["grafana.${var.environment}.${var.app_name}.${var.domain}"]
+#           hosts      = ["${var.environment}.${var.app_name}.${var.domain}"]
 #           secretName = "grafana-tls"
 #         }
 #       ]
@@ -463,7 +475,7 @@
 #           http = {
 #             paths = [
 #               {
-#                 path     = "/"
+#                 path     = "/grafana"
 #                 pathType = "Prefix"
 #                 backend = {
 #                   service = {
@@ -482,65 +494,89 @@
 #   })
 
 #   depends_on = [
-#     helm_release.kube_prometheus_stack,
+#     helm_release.kube_prometheus_grafana_stack,
 #   ]
 # }
 
 # # ============================================================================
 # # Ingress for Prometheus UI (Optional - for debugging)
 # # ============================================================================
-# # resource "kubectl_manifest" "prometheus_ingress" {
-# #   yaml_body = yamlencode({
-# #     apiVersion = "networking.k8s.io/v1"
-# #     kind       = "Ingress"
-# #     metadata = {
-# #       name      = "prometheus-ingress"
-# #       namespace = kubernetes_namespace.monitoring.metadata[0].name
-# #       annotations = {
-# #         "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
-# #         "nginx.ingress.kubernetes.io/rewrite-target"     = "/$2"
-# #         "nginx.ingress.kubernetes.io/use-regex"          = "true"
-# #         "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
-# #         "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
-# #       }
-# #       labels = {
-# #         app        = "prometheus"
-# #         managed-by = "terraform"
-# #       }
-# #     }
-# #     spec = {
-# #       ingressClassName = "nginx"
-# #       tls = [
-# #         {
-# #           hosts = ["${var.subdomain}.${var.domain_name}"]
-# #           secretName = "prometheus-tls"
-# #         }
-# #       ]
-# #       rules = [
-# #         {
-# #           host = "${var.subdomain}.${var.domain_name}"
-# #           http = {
-# #             paths = [
-# #               {
-# #                 path     = "/prometheus(/|$)(.*)"
-# #                 pathType = "ImplementationSpecific"
-# #                 backend = {
-# #                   service = {
-# #                     name = "kube-prometheus-stack-prometheus"
-# #                     port = {
-# #                       number = 9090
-# #                     }
-# #                   }
-# #                 }
-# #               }
-# #             ]
-# #           }
-# #         }
-# #       ]
-# #     }
-# #   })
+# resource "kubectl_manifest" "prometheus_ingress" {
+#   yaml_body = yamlencode({
+#     apiVersion = "networking.k8s.io/v1"
+#     kind       = "Ingress"
+#     metadata = {
+#       name      = "prometheus-ingress"
+#       namespace = kubernetes_namespace.monitoring.metadata[0].name
+#       annotations = {
+#         # Create an internet-facing ALB (public access)
+#         "alb.ingress.kubernetes.io/scheme" = "internet-facing"
 
-# #   depends_on = [
-# #     helm_release.kube_prometheus_stack,
-# #   ]
-# # }
+#         # Use IP mode for better compatibility with Fargate and pod networking
+#         "alb.ingress.kubernetes.io/target-type" = "ip"
+
+#         # Health check path - ALB will check this endpoint for service health
+#         "alb.ingress.kubernetes.io/healthcheck-path" = "/"
+
+#         # SSL/TLS Configuration
+#         # Listen on both HTTP (80) and HTTPS (443) ports
+#         "alb.ingress.kubernetes.io/listen-ports" = "[{\"HTTP\": 80}, {\"HTTPS\": 443}]"
+
+#         # Automatically redirect HTTP traffic to HTTPS
+#         "alb.ingress.kubernetes.io/ssl-redirect" = "443"
+
+#         # SSL Security Policy - ensures strong encryption
+#         "alb.ingress.kubernetes.io/ssl-policy" = "ELBSecurityPolicy-TLS-1-2-2017-01"
+
+#         # AWS ACM Certificate ARN - replace with your certificate ARN
+#         # NOTE: Ensure this certificate covers your domain and is in the correct AWS region
+#         "alb.ingress.kubernetes.io/certificate-arn" = aws_acm_certificate.cert.arn
+
+#         # HTTP to HTTPS redirect action configuration
+#         "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": {\"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
+
+#         # Group name - all ingresses with the same group share a single ALB
+#         "alb.ingress.kubernetes.io/group.name" = "shared-alb"
+#       }
+
+#       labels = {
+#         app        = "prometheus"
+#         managed-by = "terraform"
+#       }
+#     }
+#     spec = {
+#       ingressClassName = "alb"
+#       tls = [
+#         {
+#           hosts      = ["${var.environment}.${var.app_name}.${var.domain}"]
+#           secretName = "prometheus-tls"
+#         }
+#       ]
+#       rules = [
+#         {
+#           host = "prometheus.${var.environment}.${var.app_name}.${var.domain}"
+#           http = {
+#             paths = [
+#               {
+#                 path     = "/"
+#                 pathType = "Prefix"
+#                 backend = {
+#                   service = {
+#                     name = "kube-prometheus-stack-prometheus"
+#                     port = {
+#                       number = 9090
+#                     }
+#                   }
+#                 }
+#               }
+#             ]
+#           }
+#         }
+#       ]
+#     }
+#   })
+
+#   depends_on = [
+#     helm_release.kube_prometheus_grafana_stack,
+#   ]
+# }

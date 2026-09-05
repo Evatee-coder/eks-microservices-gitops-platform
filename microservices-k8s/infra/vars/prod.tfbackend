@@ -1,4 +1,4 @@
 bucket  = "state-bucket-216989097838"
-key     = "eksBootieDec25/dev/Part9-10/terraform.tfstate"
+key     = "eks/prod/microservices/eks-services/terraform.tfstate"
 region  = "us-east-1"
 encrypt = true

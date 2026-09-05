@@ -1,4 +1,0 @@
-bucket  = "state-bucket-216989097838"
-key     = "eksBootieDec25/prod/Part9-10/terraform.tfstate"
-region  = "us-east-1"
-encrypt = true
