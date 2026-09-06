@@ -1,4 +1,4 @@
-# IAM Role for AWS Load Balancer Controller
+#IAM Role for AWS Load Balancer Controller
 resource "aws_iam_role" "aws_load_balancer_controller" {
   name = "${var.environment}-${var.prefix}-aws-load-balancer-controller"
 

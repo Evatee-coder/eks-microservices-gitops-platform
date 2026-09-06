@@ -1,4 +1,41 @@
-# Terraform state access policy
+# IAM policies and attachments for the GitHub Actions OIDC build role
+# defined in main.tf. Split out here to keep identity (main.tf) separate
+# from permissions (this file).
+
+# --- ECR push/pull policy ---
+resource "aws_iam_policy" "ecr_push_pull" {
+  name        = "eks-ECRPushPullPolicy"
+  description = "Policy that allows push and pull images from ECR repositories"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:ListTagsForResource",
+          "ecr:DescribeRepositories",
+          "ecr:TagResource",
+          "ecr:UntagResource"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_ecr" {
+  role       = aws_iam_role.github_actions_build.name
+  policy_arn = aws_iam_policy.ecr_push_pull.arn
+}
+
+# --- Terraform state access policy ---
 resource "aws_iam_policy" "terraform_state_access" {
   name = "eks-terraform-state-access"
 
@@ -32,7 +69,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_state" {
   policy_arn = aws_iam_policy.terraform_state_access.arn
 }
 
-
+# --- Self GetRole policy ---
 resource "aws_iam_policy" "self_get_role" {
   name = "eks-github-actions-self-getrole"
 
@@ -53,6 +90,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_self_getrole" {
   policy_arn = aws_iam_policy.self_get_role.arn
 }
 
+# --- SSM parameter lookup (EKS AMI IDs) ---
 resource "aws_iam_policy" "ssm_eks_ami_lookup" {
   name = "eks-github-actions-ssm-ami-lookup"
 
@@ -73,6 +111,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_ssm_ami" {
   policy_arn = aws_iam_policy.ssm_eks_ami_lookup.arn
 }
 
+# --- EKS + supporting infra provisioning ---
 resource "aws_iam_policy" "eks_provisioning" {
   name = "eks-github-actions-provisioning"
 
@@ -171,6 +210,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_eks_provisioning" {
   policy_arn = aws_iam_policy.eks_provisioning.arn
 }
 
+# --- RDS subnet group management ---
 resource "aws_iam_policy" "rds_provisioning" {
   name = "eks-github-actions-rds-provisioning"
 
@@ -199,5 +239,13 @@ resource "aws_iam_role_policy_attachment" "github_actions_rds" {
   policy_arn = aws_iam_policy.rds_provisioning.arn
 }
 
+# --- Import existing resources (created before Terraform managed this state) ---
+import {
+  to = aws_iam_policy.ecr_push_pull
+  id = "arn:aws:iam::216989097838:policy/eks-ECRPushPullPolicy"
+}
 
-
+import {
+  to = aws_iam_role_policy_attachment.github_actions_ecr
+  id = "eks-github-actions-build-role/arn:aws:iam::216989097838:policy/eks-ECRPushPullPolicy"
+}

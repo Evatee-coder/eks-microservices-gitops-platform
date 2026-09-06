@@ -15,20 +15,6 @@ data "aws_iam_openid_connect_provider" "github_actions" {
   url = "https://token.actions.githubusercontent.com"
 }
 
-# data "tls_certificate" "github_actions" {
-#   url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
-# }
-
-# resource "aws_iam_openid_connect_provider" "github_actions" {
-#   url             = "https://token.actions.githubusercontent.com"
-#   client_id_list  = ["sts.amazonaws.com"]
-#   thumbprint_list = [data.tls_certificate.github_actions.certificates[0].sha1_fingerprint]
-
-#   tags = {
-#     Name = "github-actions-oidc-provider"
-#   }
-# }
-
 resource "aws_iam_role" "github_actions_build" {
   name = "eks-github-actions-build-role"
 
@@ -65,18 +51,39 @@ resource "aws_iam_role" "github_actions_build" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "github_actions_ecr" {
-  role       = aws_iam_role.github_actions_build.name
-  policy_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/eks-ECRPushPullPolicy"
-}
-
-
 import {
   to = aws_iam_role.github_actions_build
   id = "eks-github-actions-build-role"
 }
 
-import {
-  to = aws_iam_role_policy_attachment.github_actions_ecr
-  id = "eks-github-actions-build-role/arn:aws:iam::216989097838:policy/eks-ECRPushPullPolicy"
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,34 +1,37 @@
-# # 2 private subnet for database
-# resource "aws_subnet" "rds_1" {
-#   cidr_block        = "10.0.7.0/24"
-#   availability_zone = "us-east-1a"
-#   vpc_id            = var.vpc_id
+# # # 2 private subnet for database
+# # resource "aws_subnet" "rds_1" {
+# #   cidr_block        = "10.0.7.0/24"
+# #   availability_zone = "us-east-1a"
+# #   vpc_id            = var.vpc_id
 
-#   tags = {
-#     Name = "RDS Private Subnet 1"
-#   }
-# }
+# #   tags = {
+# #     Name = "RDS Private Subnet 1"
+# #   }
+# # }
 
-# resource "aws_subnet" "rds_2" {
-#   cidr_block        = "10.0.8.0/24"
-#   availability_zone = "us-east-1b"
-#   vpc_id            = var.vpc_id
+# # resource "aws_subnet" "rds_2" {
+# #   cidr_block        = "10.0.8.0/24"
+# #   availability_zone = "us-east-1b"
+# #   vpc_id            = var.vpc_id
 
-#   tags = {
-#     Name = "RDS Private Subnet 2"
-#   }
-# }
+# #   tags = {
+# #     Name = "RDS Private Subnet 2"
+# #   }
+# # }
 
+
+# # --- RDS security group ---
 # resource "aws_security_group" "rds" {
 #   name        = "${var.environment}-rds-sg"
 #   vpc_id      = var.vpc_id
-#   description = "allow inbound access from the ECS only"
+#   description = "allow db inbound access from EKS nodes only"
 
 #   ingress {
 #     protocol    = "tcp"
 #     from_port   = 5432
 #     to_port     = 5432
 #     cidr_blocks = ["0.0.0.0/0"]
+#     #security_groups = [module.eks.node_security_group_id]
 #   }
 
 #   egress {
@@ -39,6 +42,7 @@
 #   }
 # }
 
+# # --- RDS instance ---
 # resource "aws_db_instance" "postgres" {
 #   identifier            = "${var.environment}-${var.app_name}-db"
 #   allocated_storage     = var.db_default_settings.allocated_storage
@@ -50,7 +54,7 @@
 #   password              = random_password.dbs_random_string.result
 #   port                  = 5432
 #   publicly_accessible   = false
-#   db_subnet_group_name  = aws_db_subnet_group.postgres.id
+#   db_subnet_group_name  = module.vpc.database_subnet_group_name #aws_db_subnet_group.postgres.id
 #   ca_cert_identifier    = var.db_default_settings.ca_cert_name
 #   storage_encrypted     = true
 #   storage_type          = "gp3"
@@ -96,20 +100,21 @@
 #   }
 # }
 
-# resource "aws_db_subnet_group" "postgres" {
-#   name        = "${var.prefix}-${var.environment}-rds-db-subnet-group"
-#   description = "Subnet group for RDS instance"
-#   subnet_ids = [
-#     aws_subnet.rds_1.id,
-#     aws_subnet.rds_2.id
-#   ]
-#   # subnet_ids =["subnet-0f42a1b9efaf4e602", "subnet-0395e32fc16981198"]
+# # resource "aws_db_subnet_group" "postgres" {
+# #   name        = "${var.prefix}-${var.environment}-rds-db-subnet-group"
+# #   description = "Subnet group for RDS instance"
+# #   subnet_ids = [
+# #     aws_subnet.rds_1.id,
+# #     aws_subnet.rds_2.id
+# #   ]
+# #   # subnet_ids =["subnet-0f42a1b9efaf4e602", "subnet-0395e32fc16981198"]
 
-#   tags = {
-#     Name        = "${var.prefix}-${var.environment}-db-subnet-group"
-#     Environment = var.environment
-#   }
-# }
+# #   tags = {
+# #     Name        = "${var.prefix}-${var.environment}-db-subnet-group"
+# #     Environment = var.environment
+# #   }
+# # }
+
 
 # resource "aws_kms_key" "env_kms" {
 #   description             = "KMS key for RDS and Secrets Manager"
