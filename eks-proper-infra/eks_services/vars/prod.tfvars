@@ -1,5 +1,5 @@
 environment   = "prod"
 if_eks_needed = true
-vpc_id        = "vpc-0df702f1ae0791c47"
+vpc_id        = "vpc-07824dd497cf7cb50"
 
 eks_cluster_name = "ekscluster"
