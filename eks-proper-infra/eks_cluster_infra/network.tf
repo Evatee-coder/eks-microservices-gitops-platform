@@ -6,9 +6,9 @@ module "vpc" {
   cidr = var.vpc_cidr
 
   # # for two azs
-  # azs             = ["${var.aws_region}a", "${var.aws_region}b"]
-  # private_subnets = var.subnet_cidrs["private_subnets"]
-  # public_subnets  = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
+  azs             = ["${var.aws_region}a", "${var.aws_region}b"]
+  private_subnets = var.subnet_cidrs["private_subnets"]
+  public_subnets  = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
 
   # 4 private subnets across 2 AZs (2 for EKS, 2 for RDS)
   # azs = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}a", "${var.aws_region}b"]
@@ -19,10 +19,10 @@ module "vpc" {
 
   # 2 AZs — EKS private subnets stay as "private_subnets",
   # RDS private subnets are now first-class "database_subnets"
-  azs              = ["${var.aws_region}a", "${var.aws_region}b"]
-  private_subnets  = var.subnet_cidrs["eks_private_subnets"]
-  database_subnets = var.subnet_cidrs["rds_private_subnets"]
-  public_subnets   = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
+  # azs              = ["${var.aws_region}a", "${var.aws_region}b"]
+  # private_subnets  = var.subnet_cidrs["eks_private_subnets"]
+  # database_subnets = var.subnet_cidrs["rds_private_subnets"]
+  # public_subnets   = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
 
   enable_nat_gateway = true
   single_nat_gateway = true
@@ -50,7 +50,7 @@ module "vpc" {
   # NOTE: no private_subnet_tags here — EKS-specific tags are applied
   # explicitly below, scoped only to the EKS subnets (not RDS).
   public_subnet_tags = {
-    "kubernetes.io/cluster/eks-microservices-gitops-platform" = "shared"
+    "kubernetes.io/cluster/${var.environment}-${var.prefix}-${var.eks_cluster_name}" = "shared"
     "kubernetes.io/role/elb"                                  = "1"
   }
 
@@ -58,15 +58,9 @@ module "vpc" {
   # EKS-specific discovery tags now apply directly to private_subnets —
   # database_subnets are a separate module output and are never touched by these
   private_subnet_tags = {
-    "kubernetes.io/cluster/eks-microservices-gitops-platform" = "shared"
+    "kubernetes.io/cluster/${var.environment}-${var.prefix}-${var.eks_cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"                         = "1"
   }
-
-  # # Required tags for EKS cluster subnet discovery
-  # private_subnet_tags = {
-  #   "kubernetes.io/cluster/eks-three-tier-end-to-end" = "shared"
-  #   "kubernetes.io/role/internal-elb"                 = "1"
-  # }
 
 }
 

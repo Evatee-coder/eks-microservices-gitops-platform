@@ -26,3 +26,10 @@ terraform apply -var-file=vars/prod.tfvars
 aws eks update-kubeconfig --name prod-microservices-ekscluster
 
 kubectl config rename-context <arn..clusterName> <newName>
+
+
+start cluster via github
+start eks services via github
+apply terraform to microservices folder to create ecr repos (4) of them
+use github ms build to build image and push them to the ecr repos
+use argocd to deploy the apps
