@@ -9,6 +9,7 @@ module "vpc" {
   azs             = ["${var.aws_region}a", "${var.aws_region}b"]
   private_subnets = var.subnet_cidrs["private_subnets"]
   public_subnets  = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
+  database_subnets = var.subnet_cidrs["rds_private_subnets"]
 
   # 4 private subnets across 2 AZs (2 for EKS, 2 for RDS)
   # azs = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}a", "${var.aws_region}b"]

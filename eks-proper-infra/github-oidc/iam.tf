@@ -3,70 +3,70 @@
 # from permissions (this file).
 
 
-resource "aws_iam_policy" "additional_services" {
-  name = "eks-github-actions-additional-services"
+# resource "aws_iam_policy" "additional_services" {
+#   name = "eks-github-actions-additional-services"
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "ACMReadAccess"
-        Effect = "Allow"
-        Action = [
-          "acm:DescribeCertificate",
-          "acm:ListCertificates",
-          "acm:GetCertificate"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "Route53Access"
-        Effect = "Allow"
-        Action = [
-          "route53:GetHostedZone",
-          "route53:ListHostedZones",
-          "route53:ChangeResourceRecordSets",
-          "route53:GetChange",
-          "route53:ListResourceRecordSets"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "SecretsManagerAccess"
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:CreateSecret",
-          "secretsmanager:DeleteSecret",
-          "secretsmanager:DescribeSecret",
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:PutSecretValue",
-          "secretsmanager:TagResource",
-          "secretsmanager:UntagResource"
-        ]
-        Resource = "arn:aws:secretsmanager:us-east-1:216989097838:secret:*"
-      },
-      {
-        Sid    = "RDSInstanceAccess"
-        Effect = "Allow"
-        Action = [
-          "rds:CreateDBInstance",
-          "rds:DeleteDBInstance",
-          "rds:DescribeDBInstances",
-          "rds:ModifyDBInstance",
-          "rds:AddTagsToResource",
-          "rds:ListTagsForResource",
-          "rds:RemoveTagsFromResource"
-        ]
-        Resource = "arn:aws:rds:us-east-1:216989097838:db:*"
-      }
-    ]
-  })
-}
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Sid    = "ACMReadAccess"
+#         Effect = "Allow"
+#         Action = [
+#           "acm:DescribeCertificate",
+#           "acm:ListCertificates",
+#           "acm:GetCertificate"
+#         ]
+#         Resource = "*"
+#       },
+#       {
+#         Sid    = "Route53Access"
+#         Effect = "Allow"
+#         Action = [
+#           "route53:GetHostedZone",
+#           "route53:ListHostedZones",
+#           "route53:ChangeResourceRecordSets",
+#           "route53:GetChange",
+#           "route53:ListResourceRecordSets"
+#         ]
+#         Resource = "*"
+#       },
+#       {
+#         Sid    = "SecretsManagerAccess"
+#         Effect = "Allow"
+#         Action = [
+#           "secretsmanager:CreateSecret",
+#           "secretsmanager:DeleteSecret",
+#           "secretsmanager:DescribeSecret",
+#           "secretsmanager:GetSecretValue",
+#           "secretsmanager:PutSecretValue",
+#           "secretsmanager:TagResource",
+#           "secretsmanager:UntagResource"
+#         ]
+#         Resource = "arn:aws:secretsmanager:us-east-1:216989097838:secret:*"
+#       },
+#       {
+#         Sid    = "RDSInstanceAccess"
+#         Effect = "Allow"
+#         Action = [
+#           "rds:CreateDBInstance",
+#           "rds:DeleteDBInstance",
+#           "rds:DescribeDBInstances",
+#           "rds:ModifyDBInstance",
+#           "rds:AddTagsToResource",
+#           "rds:ListTagsForResource",
+#           "rds:RemoveTagsFromResource"
+#         ]
+#         Resource = "arn:aws:rds:us-east-1:216989097838:db:*"
+#       }
+#     ]
+#   })
+# }
 
-resource "aws_iam_role_policy_attachment" "github_actions_additional_services" {
-  role       = aws_iam_role.github_actions_build.name
-  policy_arn = aws_iam_policy.additional_services.arn
-}
+# resource "aws_iam_role_policy_attachment" "github_actions_additional_services" {
+#   role       = aws_iam_role.github_actions_build.name
+#   policy_arn = aws_iam_policy.additional_services.arn
+# }
 
 # --- ECR push/pull policy ---
 resource "aws_iam_policy" "ecr_push_pull" {
