@@ -237,3 +237,5 @@ argocd app logs frontend --follow
 # Diff between Git and Cluster
 argocd app diff frontend
 ```
+
+Author
