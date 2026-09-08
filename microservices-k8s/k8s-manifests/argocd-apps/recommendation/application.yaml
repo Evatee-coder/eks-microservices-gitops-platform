@@ -8,10 +8,10 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Evatee-coder/part5-github-oidc-aws.git
+    repoURL: https://github.com/Evatee-coder/eks-microservices-gitops-platform
     targetRevision: prod
     # targetRevision: main --- IGNORE ---
-    path: Part9-10/k8s-menifests
+    path: microservices-k8s/k8s-manifests
     directory:
       include: '05-recommendation-deployment.yaml'
   destination:
