@@ -9,8 +9,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Evatee-coder/eks-microservices-gitops-platform
-    targetRevision: prod
-    # targetRevision: main --- IGNORE ---
+    #targetRevision: prod
+    targetRevision: main #--- IGNORE ---
     path: microservices-k8s/k8s-manifests
     directory:
       include: '04-voting-deployment.yaml'
