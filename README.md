@@ -15,6 +15,37 @@ Production-style GitOps delivery platform combining **Terraform, Amazon EKS, Git
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Deployment & Validation](#deployment--validation)
+  - [CI/CD — GitHub Actions](#cicd--github-actions)
+  - [GitOps — ArgoCD App-of-Apps](#gitops--argocd-app-of-apps)
+  - [Application Outputs](#application-outputs)
+  - [EKS Workload Health](#eks-workload-health)
+  - [Ingress and Application Load Balancer](#ingress-and-application-load-balancer)
+- [Project Highlights](#project-highlights)
+- [Tech Stack](#tech-stack)
+- [Key Engineering Decisions](#key-engineering-decisions)
+- [Security Design](#security-design)
+- [CI/CD and GitOps Workflow](#cicd-and-gitops-workflow)
+- [Responsibility Boundaries](#responsibility-boundaries)
+- [Engineering Challenges and Lessons](#engineering-challenges-and-lessons)
+- [Deployment](#deployment)
+  - [Prerequisites](#prerequisites)
+  - [Provision VPC and EKS](#1-provision-vpc-and-eks)
+  - [Configure Kubernetes Access](#2-configure-kubernetes-access)
+  - [Provision Cluster Services](#3-provision-cluster-services)
+  - [Provision Application Infrastructure](#4-provision-application-infrastructure)
+  - [Bootstrap ArgoCD App-of-Apps](#5-bootstrap-argocd-app-of-apps)
+  - [Verify Deployment](#6-verify-deployment)
+  - [Access ArgoCD](#7-access-argocd)
+- [Teardown](#teardown)
+- [Skills Demonstrated](#skills-demonstrated)
+- [Future Improvements](#future-improvements)
+- [Author](#author)
+
 ## Overview
 
 Craftica demonstrates a GitOps-based delivery architecture for running containerized microservices on Amazon EKS.
@@ -54,117 +85,96 @@ Application releases therefore do not require Terraform changes, while infrastru
 
 ## Architecture
 
-> **[Architecture Diagram Placeholder]**
-
-### High-Level Architecture
-
-```text
-                         GitHub Repository
-                               │
-                         GitHub Actions
-                               │
-                         OIDC Federation
-                               │
-                               ▼
-                         Amazon ECR
-                               │
-                               │ Image
-                               ▼
-Git Repository ─────────────► ArgoCD
-                               │
-                               │ GitOps Reconciliation
-                               ▼
-                         Amazon EKS
-                               │
-                 ┌─────────────┼─────────────┐
-                 │             │             │
-              frontend     catalogue      voting
-                                │
-                         recommendation
-                               │
-                               ▼
-                      Kubernetes Services
-                               │
-                               ▼
-                AWS Load Balancer Controller
-                               │
-                               ▼
-                         Shared ALB
-                               │
-                         Route53 + ACM
-                               │
-                               ▼
-                            Clients
-
-                      catalogue
-                          │
-                          ▼
-                  RDS PostgreSQL
-```
-
-### Infrastructure Layout
-
-The AWS environment uses a VPC spanning two Availability Zones with:
-
-- Public subnets for internet-facing infrastructure
-- Private subnets for the EKS managed node group
-- Isolated database subnets for Amazon RDS
-- NAT-based outbound connectivity for private workloads
-- Security-group-based traffic segmentation
-
-Amazon RDS PostgreSQL is isolated from direct internet access and accepts PostgreSQL traffic only from the EKS node security group.
-
-### Request Flow
-
-```text
-Client
-  ↓
-Route53
-  ↓
-Application Load Balancer
-  ↓
-TLS termination with ACM
-  ↓
-Host-based routing
-  ↓
-Kubernetes Service
-  ↓
-Pod
-  ↓
-RDS PostgreSQL (catalogue service only)
-```
-
-The AWS Load Balancer Controller uses `ip` target mode, allowing the ALB to route traffic directly to Kubernetes pod IPs.
-
-### Deployment Flow
-
-```text
-Developer Push
-      ↓
-GitHub Actions
-      ↓
-OIDC Authentication to AWS
-      ↓
-Docker Buildx
-      ↓
-Commit-SHA Image Tag
-      ↓
-Amazon ECR
-      ↓
-Kubernetes Manifest Update
-      ↓
-Git Commit
-      ↓
-ArgoCD
-      ↓
-Automatic Reconciliation
-      ↓
-Amazon EKS
-      ↓
-Kubernetes Rolling Deployment
-```
+![Architectural Diagram](docs/images/3-tier-aws-architecture.png.png)
 
 ---
+
+## Deployment & Validation 
+
+The following outputs validate the end-to-end delivery path from CI image builds through GitOps reconciliation to healthy workloads running on Amazon EKS.
+
+**GitHub Actions → Amazon ECR → Git → ArgoCD → Amazon EKS → ALB**
+
+### CI/CD — GitHub Actions
+
+<p align="center">
+  <img src="docs/images/github-actions-build-success.png"
+       alt="GitHub Actions successful microservices build and publish workflow"
+       width="900">
+</p>
+
+<p align="center">
+  <em>GitHub Actions successfully building and publishing the four microservice container images.</em>
+</p>
+
+### GitOps — ArgoCD App-of-Apps
+
+<p align="center">
+  <img src="docs/images/argocd-app-of-apps.png"
+       alt="ArgoCD App-of-Apps showing synchronized and healthy applications"
+       width="900">
+</p>
+
+<p align="center">
+  <em>ArgoCD App-of-Apps showing the microservice applications synchronized and healthy.</em>
+</p>
+
+### Application Outputs
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Frontend</strong><br>
+      <img src="docs/images/frontend-deployment.png"
+           alt="Frontend service"
+           width="420">
+    </td>
+    <td align="center">
+      <strong>Catalogue</strong><br>
+      <img src="docs/images/catalogue-deployment.png"
+           alt="Catalogue service"
+           width="420">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Voting</strong><br>
+      <img src="docs/images/voting-deployment.png"
+           alt="Voting service"
+           width="420">
+    </td>
+    <td align="center">
+      <strong>Recommendation</strong><br>
+      <img src="docs/images/recommendation-deployment.png"
+           alt="Recommendation service"
+           width="420">
+    </td>
+  </tr>
+</table>
+
+### EKS Workload Health
+
+<p align="center">
+  <img src="docs/images/kubernetes-workloads.png"
+       alt="Healthy microservice workloads running on Amazon EKS"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Microservice deployments and pods running successfully on Amazon EKS.</em>
+</p>
+
+### Ingress and Application Load Balancer
+
+<p align="center">
+  <img src="docs/images/ingress-alb.png"
+       alt="Kubernetes Ingress resources exposed through AWS ALB"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Host-based Kubernetes Ingress routes exposing the applications through the shared AWS Application Load Balancer.</em>
+</p>
 
 ## Project Highlights
 
@@ -183,53 +193,23 @@ Kubernetes Rolling Deployment
 
 ## Tech Stack
 
-### Infrastructure and AWS
-
-- Terraform
-- Amazon VPC
-- Amazon EKS
-- Amazon EC2 managed node groups
-- Amazon ECR
-- Amazon RDS PostgreSQL
-- Amazon S3 remote state
-- AWS IAM
-- AWS OIDC federation
-- AWS KMS
-- AWS Secrets Manager
-- AWS Certificate Manager
-- Amazon Route53
-- Application Load Balancer
-
-### Kubernetes and GitOps
-
-- Kubernetes
-- ArgoCD
-- ArgoCD App-of-Apps
-- AWS Load Balancer Controller
-- Helm
-- IRSA
-- Kubernetes Deployments
-- Services
-- Ingress
-- ConfigMaps
-- Secrets
-
-### CI/CD and Containers
-
-- GitHub Actions
-- GitHub OIDC
-- Docker
-- Docker Buildx
-- Amazon ECR
-- Commit-SHA image versioning
-
-### Application Stack
-
-- Node.js / Express
-- Python / Flask / Gunicorn
-- Java / Spring Boot
-- Go / Gin
-- PostgreSQL
+| Category | Technologies |
+|---|---|
+| **Cloud Platform** | AWS |
+| **Infrastructure as Code** | Terraform, S3 Remote State, `terraform-aws-modules/vpc`, `terraform-aws-modules/eks` |
+| **Container Orchestration** | Amazon EKS, Kubernetes, EC2 Managed Node Groups |
+| **GitOps** | ArgoCD, App-of-Apps, Automated Sync, Self-Heal, Prune |
+| **CI/CD** | GitHub Actions, GitHub OIDC, Docker Buildx |
+| **Containers & Registry** | Docker, Amazon ECR |
+| **Identity & Access** | AWS IAM, OIDC Federation, IRSA |
+| **Networking** | Amazon VPC, Public/Private/Database Subnets, NAT Gateway, Internet Gateway, Security Groups |
+| **Ingress & Load Balancing** | AWS Load Balancer Controller, Application Load Balancer, Kubernetes Ingress |
+| **DNS & TLS** | Amazon Route 53, AWS Certificate Manager (ACM) |
+| **Database** | Amazon RDS for PostgreSQL |
+| **Security & Secrets** | AWS KMS, AWS Secrets Manager, IAM Trust Policies |
+| **Kubernetes Configuration** | Deployments, Services, Ingress, ConfigMaps, Secrets, Liveness/Readiness Probes |
+| **Application Stack** | Node.js/Express, Python/Flask/Gunicorn, Java/Spring Boot, Go/Gin |
+| **Observability Readiness** | Prometheus-format application metrics |
 
 ---
 
@@ -494,26 +474,127 @@ The resulting boundaries isolate:
 
 ## Deployment Evidence
 
-### CI/CD
+The following outputs demonstrate the complete delivery path from CI image builds through GitOps reconciliation to running workloads on Amazon EKS.
 
-> **[Screenshot Placeholder — Successful GitHub Actions workflow]**
+### GitHub Actions — Microservices Build and Publish
 
-### ArgoCD App-of-Apps
+The `ms-build-deploy.yaml` workflow builds the four microservices, tags each container image with the Git commit SHA, and publishes the images to Amazon ECR.
 
-> **[Screenshot Placeholder — Root application with child applications Healthy / Synced]**
+<p align="center">
+  <img src="docs/images/github-actions-build-success.png"
+       alt="GitHub Actions successful microservices build and deployment workflow"
+       width="900">
+</p>
 
-### Kubernetes Workloads
+<p align="center">
+  <em>GitHub Actions matrix workflow successfully building and publishing the four microservice images.</em>
+</p>
 
-> **[Screenshot Placeholder — Running workloads in the `craftica` namespace]**
+---
 
-### Application
+### ArgoCD — App-of-Apps GitOps Deployment
 
-> **[Screenshot Placeholder — Deployed Craftica application / microservices]**
+The root ArgoCD application manages the four microservice child applications independently through the App-of-Apps pattern.
 
-### Ingress
+<p align="center">
+  <img src="docs/images/argocd-app-of-apps.png"
+       alt="ArgoCD App-of-Apps deployment showing synchronized and healthy microservices"
+       width="900">
+</p>
 
-> **[Screenshot Placeholder — Shared ALB and Kubernetes Ingress resources]**
+<p align="center">
+  <em>ArgoCD App-of-Apps topology showing the microservice applications synchronized with the desired state in Git.</em>
+</p>
 
+---
+
+### Frontend Service
+
+**Runtime:** Node.js / Express
+
+<p align="center">
+  <img src="docs/images/frontend-deployment.png"
+       alt="Craftica frontend service running on Amazon EKS"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Node.js/Express frontend successfully deployed to Amazon EKS and exposed through the shared Application Load Balancer.</em>
+</p>
+
+---
+
+### Catalogue Service
+
+**Runtime:** Python / Flask + Gunicorn  
+**Data Store:** Amazon RDS for PostgreSQL
+
+<p align="center">
+  <img src="docs/images/catalogue-deployment.png"
+       alt="Craftica catalogue service running on Amazon EKS"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Python/Flask catalogue service running on Amazon EKS with persistent data provided by Amazon RDS for PostgreSQL.</em>
+</p>
+
+---
+
+### Voting Service
+
+**Runtime:** Java / Spring Boot
+
+<p align="center">
+  <img src="docs/images/voting-deployment.png"
+       alt="Craftica voting service running on Amazon EKS"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Java/Spring Boot voting service successfully deployed and routed through the shared ALB using Kubernetes Ingress.</em>
+</p>
+
+---
+
+### Recommendation Service
+
+**Runtime:** Go / Gin
+
+<p align="center">
+  <img src="docs/images/recommendation-deployment.png"
+       alt="Craftica recommendation service running on Amazon EKS"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Go/Gin recommendation service running as an independently managed Kubernetes workload on Amazon EKS.</em>
+</p>
+
+---
+
+### Kubernetes Workload Health
+
+<p align="center"> 
+  <img src="docs/images/kubernetes-workloads.png" 
+  alt="Healthy Craftica microservice pods running on Amazon EKS" 
+  width="900"> 
+</p> 
+
+<p align="center"> 
+ <em>Amazon EKS workload health showing the Craftica microservice pods successfully running and ready in the Kubernetes cluster.</em> 
+</p>
+
+### Kubernetes Ingress — Shared Application Load Balancer
+<p align="center"> 
+ <img src="docs/images/ingress-alb.png" 
+ alt="Kubernetes Ingress resources exposed through the shared AWS Application Load Balancer" 
+ width="900"> 
+</p> 
+
+<p align="center"> 
+ <em>Kubernetes Ingress resources exposing the microservices through a shared AWS Application Load Balancer with host-based routing.</em> 
+</p>
 ---
 
 ## Deployment
