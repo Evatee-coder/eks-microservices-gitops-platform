@@ -155,7 +155,7 @@ The following outputs validate the end-to-end delivery path from CI image builds
 ### EKS Workload Health
 
 <p align="center">
-  <img src="docs/images/kubernetes-workloads.png"
+  <img src="docs/images/kubernetes-workloads2.png"
        alt="Healthy microservice workloads running on Amazon EKS"
        width="900">
 </p>
