@@ -33,3 +33,10 @@ start eks services via github
 apply terraform to microservices folder to create ecr repos (4) of them
 use github ms build to build image and push them to the ecr repos
 use argocd to deploy the apps
+
+
+to destroy
+first delete the argocd apps
+destroy the microservices infra using tf
+destroy the eks_services via github
+destroy the cluster via github                               

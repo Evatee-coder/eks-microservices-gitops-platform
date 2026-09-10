@@ -11,20 +11,6 @@ module "vpc" {
   public_subnets  = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
   database_subnets = var.subnet_cidrs["rds_private_subnets"]
 
-  # 4 private subnets across 2 AZs (2 for EKS, 2 for RDS)
-  # azs = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}a", "${var.aws_region}b"]
-  # private_subnets = concat(
-  #   var.subnet_cidrs["eks_private_subnets"],
-  #   var.subnet_cidrs["rds_private_subnets"]
-  # )
-
-  # 2 AZs — EKS private subnets stay as "private_subnets",
-  # RDS private subnets are now first-class "database_subnets"
-  # azs              = ["${var.aws_region}a", "${var.aws_region}b"]
-  # private_subnets  = var.subnet_cidrs["eks_private_subnets"]
-  # database_subnets = var.subnet_cidrs["rds_private_subnets"]
-  # public_subnets   = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1]]
-
   enable_nat_gateway = true
   single_nat_gateway = true
   # EKS nodes generally need a NAT gateway (or a public IP and an Internet Gateway) to join and operate within a private subnet. 

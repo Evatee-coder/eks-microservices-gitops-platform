@@ -85,7 +85,7 @@ Application releases therefore do not require Terraform changes, while infrastru
 
 ## Architecture
 
-![Architectural Diagram](docs/images/3-tier-aws-architecture.png.png)
+![Architectural Diagram](docs/images/craftica-gitops-architecture.png)
 
 ---
 
@@ -622,9 +622,6 @@ The `eks-deploy.yaml` GitHub Actions workflow can also perform infrastructure ap
 - Add automated validation for App-of-Apps revision consistency.
 
 ### Observability
-
-The microservices already expose Prometheus-format metrics.
-
 A future iteration would deploy:
 
 - Prometheus
@@ -645,5 +642,7 @@ Automate the ArgoCD root application bootstrap so the entire platform can be rec
 Senior DevOps / Platform Engineer
 
 GitHub: [@Evatee-coder](https://github.com/Evatee-coder)
+
+Linkedin: [@Linkedin](https://www.linkedin.com/in/victor-adetayo-eyelade-a98606128/)
 
 Repository: [eks-microservices-gitops-platform](https://github.com/Evatee-coder/eks-microservices-gitops-platform)
