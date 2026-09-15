@@ -31,7 +31,8 @@ kubectl config rename-context <arn..clusterName> <newName>
 start cluster via github
 start eks services via github
 apply terraform to microservices folder to create ecr repos (4) of them
-use github ms build to build image and push them to the ecr repos
+use github ms build to build image and push them to the ecr repos part1
+apply ingress-dns.tf
 use argocd to deploy the apps
 
 
