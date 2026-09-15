@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
       - name: recco
-        #image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-recco:45079f16be77f278e908fd503a51328efa194b4e
-        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-recco:45079f16be77f278e908fd503a51328efa194b4e
+        #image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-recco:6f9b5982d52512e3f514a6a266b1d35605bb6cf3
+        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-recco:6f9b5982d52512e3f514a6a266b1d35605bb6cf3
         ports:
         - containerPort: 8080
           name: http
