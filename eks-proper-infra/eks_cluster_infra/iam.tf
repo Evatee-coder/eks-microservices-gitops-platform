@@ -8,13 +8,13 @@ resource "aws_iam_role" "ebs_csi_driver" {
       {
         Effect    = "Allow"
         Principal = {
-          Federated = module.eks.oidc_provider_arn
+          Federated = module.eks[0].oidc_provider_arn
         }
         Action    = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${replace(module.eks.oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-            "${replace(module.eks.oidc_provider_url, "https://", "")}:aud" = "sts.amazonaws.com"
+            "${replace(module.eks[0].oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            "${replace(module.eks[0].oidc_provider_url, "https://", "")}:aud" = "sts.amazonaws.com"
           }
         }
       }
