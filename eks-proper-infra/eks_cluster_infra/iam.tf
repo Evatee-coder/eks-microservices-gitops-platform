@@ -13,8 +13,8 @@ resource "aws_iam_role" "ebs_csi_driver" {
         Action    = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${replace(module.eks[0].oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-            "${replace(module.eks[0].oidc_provider_url, "https://", "")}:aud" = "sts.amazonaws.com"
+            "${module.eks[0].oidc_provider}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            "${module.eks[0].oidc_provider}:aud" = "sts.amazonaws.com"
           }
         }
       }
@@ -26,4 +26,19 @@ resource "aws_iam_role" "ebs_csi_driver" {
 resource "aws_iam_role_policy_attachment" "ebs_csi_driver_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
   role       = aws_iam_role.ebs_csi_driver.name
+}
+
+# EBS CSI driver EKS addon, created standalone (outside module.eks's addons map)
+# to avoid a dependency cycle: this role's trust policy depends on the module's
+# OIDC provider output, so the module itself cannot also depend on this role.
+resource "aws_eks_addon" "ebs_csi_driver" {
+  cluster_name                = module.eks[0].cluster_name
+  addon_name                  = "aws-ebs-csi-driver"
+  service_account_role_arn    = aws_iam_role.ebs_csi_driver.arn
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
+
+  depends_on = [
+    aws_iam_role_policy_attachment.ebs_csi_driver_policy_attachment,
+  ]
 }

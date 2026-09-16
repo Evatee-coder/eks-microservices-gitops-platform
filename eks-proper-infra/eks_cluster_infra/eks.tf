@@ -6,7 +6,6 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.5.0"
 
-  #name               = "eks-three-tier-end-to-end" #
   name               = "${var.environment}-${var.prefix}-${var.eks_cluster_name}" #ekscluster
   kubernetes_version = "1.33"
 
@@ -16,12 +15,10 @@ module "eks" {
     vpc-cni = {
       before_compute = true
     }
-    aws-ebs-csi-driver = {
-      service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
-      #addon_version             = "v1.37.0-eksbuild.1"
-      resolve_conflicts_on_create = "OVERWRITE" # or "NONE" or "PRESERVE"
-      resolve_conflicts_on_update = "PRESERVE" # or "NONE" or "PRESERVE"
-    }
+    # aws-ebs-csi-driver is intentionally NOT declared here.
+    # It needs aws_iam_role.ebs_csi_driver, which needs this module's OIDC
+    # provider output -> declaring it inline creates a dependency cycle.
+    # It's created as a standalone aws_eks_addon resource in iam.tf instead.
   }
 
   # Optional
