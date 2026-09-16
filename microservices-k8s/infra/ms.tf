@@ -3,6 +3,14 @@ resource "kubernetes_service" "services" {
   metadata {
     name      = each.key
     namespace = var.app_name
+
+    # Service-level label (distinct from spec.selector, which only targets pods).
+    # The monitoring ServiceMonitors (monitoring.tf) select Services via
+    # matchLabels: app = <name> against this label -- without it, Prometheus
+    # never discovers these Services and app-level scrape targets stay empty.
+    labels = {
+      app = each.key
+    }
   }
   spec {
     selector = {
